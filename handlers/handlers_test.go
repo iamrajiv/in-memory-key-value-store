@@ -120,3 +120,47 @@ func TestCheckSetHandler(t *testing.T) {
 		t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
 	}
 }
+
+func TestCheckDeleteHandler(t *testing.T) {
+	tt := []struct {
+		key  string
+		pass bool
+	}{
+		{"abc-1", true},
+		{"abc-2", true},
+		{"xyz-1", true},
+		{"xyz-2", true},
+		{"xyz-4", false},
+	}
+	data := strings.NewReader(`{"abc-1":1,"abc-2":2,"xyz-1":"three","xyz-2":4}`)
+	req, err := http.NewRequest("POST", "/set", data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req.Header.Set("Content-Type", "application/json")
+	rr := httptest.NewRecorder()
+	handler := http.HandlerFunc(Set)
+	handler.ServeHTTP(rr, req)
+	for _, tc := range tt {
+		path := fmt.Sprintf("/delete/%s", tc.key)
+		req, err := http.NewRequest("DELETE", path, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+		rr := httptest.NewRecorder()
+		r := mux.NewRouter()
+		r.HandleFunc("/delete/{key}", Delete)
+		r.ServeHTTP(rr, req)
+		if rr.Code != http.StatusOK && tc.pass {
+			t.Errorf("handler returned wrong status code: got %v want %v", rr.Code, http.StatusOK)
+		}
+		if rr.Code == http.StatusOK && !tc.pass {
+			t.Errorf("handler should have failed on routeVariable %s: got %v want %v",
+				tc.key, rr.Code, http.StatusBadRequest)
+		}
+		expected := `{"abc-1":1,"abc-2":2,"xyz-1":"three","xyz-2":4}`
+		if strings.TrimSpace(rr.Body.String()) != expected && tc.pass {
+			t.Errorf("handler returned unexpected body: got %v want %v", rr.Body.String(), expected)
+		}
+	}
+}

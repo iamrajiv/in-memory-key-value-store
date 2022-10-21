@@ -14,6 +14,7 @@ An in-memory key-value store HTTP API Service that supports:
 - `/get/<key>`: Return the value of the key
 - `/search`: Search for keys using the `prefix` and `suffix` filters
 - `/set`: Post call which sets the key/value pair
+- `/delete/<key>`: Delete the key and its value
 
 #### Folder structure:
 

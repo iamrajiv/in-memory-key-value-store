@@ -81,6 +81,7 @@ func main() {
 	r.HandleFunc("/search", handlers.Search).Queries("prefix", "{str}").Methods("GET")
 	r.HandleFunc("/search", handlers.Search).Queries("suffix", "{str}").Methods("GET")
 	r.HandleFunc("/set", handlers.Set).Methods("POST")
+	r.HandleFunc("/delete/{key}", handlers.Delete).Methods("DELETE")
 
 	log.Println("Listening on port 8080.")
 	log.Fatal(http.ListenAndServe(":8080", r))

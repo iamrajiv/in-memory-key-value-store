@@ -62,3 +62,16 @@ func Set(w http.ResponseWriter, r *http.Request) {
 	}
 	_ = json.NewEncoder(w).Encode(store)
 }
+
+// Delete deletes the key
+func Delete(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	vars := mux.Vars(r)
+	_, ok := store[vars["key"]]
+	if !ok {
+		http.Error(w, "Key not found", http.StatusNotFound)
+		return
+	}
+	delete(store, vars["key"])
+	_ = json.NewEncoder(w).Encode(store)
+}
